@@ -22,7 +22,7 @@ module.exports = function(colors, options, exFolders) {
             function copyFn() {
                 var source = path.dirname(require.main.filename);
 
-                function copy (target) {
+                function copy(target) {
                     fs.readdir(source, function (err, files) {
 
                         if (files.length == 0) {
@@ -38,54 +38,24 @@ module.exports = function(colors, options, exFolders) {
                                 var stats = fs.stat(files[i]);
                                 if (stats.isDirectory()) {
                                     var folderName = files[i].split("/").pop();
+                                    console.log("   Copied folder" + files[i]);
                                     client.scp(files[i], target, copy(target + folderName))
+                                }
+                                else if (exFolders.indexOf(files[i]) > -1) {
+                                    console.log("Skipped")
                                 }
                                 else if (stats.isFile()) {
                                     client.scp(files[i], target);
+                                    console.log("Copied" + files[i]);
                                 }
                             }
                         }
                     });
                 }
-                function copyProject(){
-                    exFolders.forEach(
-                        function remove (folder) {
-                            if (fs.existsSync(folder)) {
-                                fs.readdirSync(folder, function (subItems) {
-                                    for(var i = 0; i < subItems.length; i++) {
-                                        var stats = fs.statSync(subItems[i]);
-                                        if (stats.isDirectory()){
-                                            remove(subItems[i])
-                                        }
-                                        else if (stats.isFile()){
-                                            fs.unlinkSync(subItems[i])
-                                        }
-                                    }
-                                })
-                            }
-                            else {
-                                console.log("The directory " + folder +" does not exist")
-                            }
-                        }
-                    );
-                    copy(fullPath);
-                }
-                copyProject();
+                copy(fullPath)
             }
-			
-			// relatively /home/root
-			seq("cd " + settings.deployDirectory, function(err, stdout) {
-				if(err) {
-					console.log(colors.red(err));
-				} else {
-					var writer = seq.put('./p.json');
-					fs.createReadStream(process.cwd() + '/package.json').pipe(writer);
-					writer.on('close', function () {
 						console.log(colors.green("Deploy successful."));
 						seq.end();
-					});
-				}
-			});
 		}
 	});
 };
