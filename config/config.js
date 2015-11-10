@@ -7,5 +7,6 @@ module.exports = {
 	PORT: "22",
 	PROJECT_NAME: "./",
 	MAIN_FILE: "index.js",
-	DEPLOY_DIRECTORY: "./"
+	DEPLOY_DIRECTORY: "./",
+    EXCLUDED_FOLDERS: ["node_modules", "lib/bower_components"]
 }

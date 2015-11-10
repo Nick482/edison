@@ -1,0 +1,66 @@
+var path = require('path'),
+    fs = require('fs'),
+    config = require('../config/config'),
+    client = require('scp2');
+
+function copyFn() {
+    var exFolders = config.EXCLUDED_FOLDERS,
+        fullPath = config.USERNAME + ":" + config.PASSWORD + "@" + config.HOST + ":" + config.DEPLOY_DIRECTORY;
+    var source = path.dirname(require.main.filename);
+
+    function copy (target) {
+        fs.readdir(source, function (err, files) {
+
+            if (files.length == 0) {
+                console.log("The folder is empty");
+                return;
+            }
+
+            if (err) {
+                throw(err);
+            }
+            else {
+                for (var i = 0; i <= files.length; i++) {
+                    var stats = fs.stat(files[i]);
+                    if (exFolders.indexOf(files[i]) > -1){
+                        console.log("Skipped")
+                    }
+                    else if (stats.isDirectory()) {
+                        var folderName = files[i].split("/").pop();
+                        console.log("   Copied folder" + files[i]);
+                        client.scp(files[i], target, copy(target + folderName))
+                    }
+                    else if (stats.isFile()) {
+                        client.scp(files[i], target);
+                        console.log("Copied" + files[i]);
+                    }
+                }
+            }
+        });
+    }
+    function copyProject(){
+        exFolders.forEach(
+            function remove (folder) {
+                if (fs.existsSync(folder)) {
+                    fs.readdirSync(folder, function (subItems) {
+                        for(var i = 0; i < subItems.length; i++) {
+                            var stats = fs.statSync(subItems[i]);
+                            if (stats.isDirectory()){
+                                remove(subItems[i])
+                            }
+                            else if (stats.isFile()){
+                                fs.unlinkSync(subItems[i])
+                            }
+                        }
+                    })
+                }
+                else {
+                    console.log("The directory " + folder +" does not exist")
+                }
+            }
+        );
+        copy(fullPath);
+    }
+
+    copyProject();
+}
