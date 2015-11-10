@@ -45,6 +45,9 @@ function copyFn() {
                     fs.readdirSync(folder, function (subItems) {
                         for(var i = 0; i < subItems.length; i++) {
                             var stats = fs.statSync(subItems[i]);
+                            if(exFolders.indexOf(subItems[i]) > -1){
+                                console.log("Skipped on Edison")
+                            }
                             if (stats.isDirectory()){
                                 remove(subItems[i])
                             }
