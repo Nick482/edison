@@ -63,4 +63,4 @@ function copyFn(source, exFolders, fullPath) {
 
     copyProject();
 }
-module.exports = copyFn();
+module.exports = copyFn;
