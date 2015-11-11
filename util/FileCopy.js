@@ -1,12 +1,8 @@
 var path = require('path'),
     fs = require('fs'),
-    config = require('../config/config'),
     client = require('scp2');
 
-function copyFn() {
-    var exFolders = config.EXCLUDED_FOLDERS,
-        fullPath = config.USERNAME + ":" + config.PASSWORD + "@" + config.HOST + ":" + config.DEPLOY_DIRECTORY;
-    var source = path.dirname(require.main.filename);
+function copyFn(source, exFolders, fullPath) {
 
     function copy (target) {
         fs.readdir(source, function (err, files) {
@@ -67,3 +63,4 @@ function copyFn() {
 
     copyProject();
 }
+module.exports = copyFn();
