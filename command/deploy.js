@@ -6,6 +6,8 @@ var sequest = require("sequest"),
 
 module.exports = function(colors, options) {
     var exFolders = config.EXCLUDED_FOLDERS,
+        host = "root" + config.HOST,
+        targetPath = config.DEPLOY_DIRECTORY,
         fullPath = config.USERNAME + ":" + config.PASSWORD + "@" + config.HOST + ":" + config.DEPLOY_DIRECTORY,
         source = path.dirname(require.main.filename);
 	options = options || {};
@@ -21,7 +23,7 @@ module.exports = function(colors, options) {
 				password: settings.password
 			});
 
-            fileCopy(source, exFolders, fullPath);
+            fileCopy(source, exFolders, fullPath, host, targetPath, seq);
 
             console.log(colors.green("Deploy successful."));
             seq.end();

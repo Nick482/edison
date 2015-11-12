@@ -1,8 +1,7 @@
 var path = require('path'),
-    fs = require('fs'),
-    client = require('scp2');
+    fs = require('fs');
 
-function copyFn(source, exFolders, fullPath) {
+function copyFn(source, exFolders, fullPath, host, targetPath, seq) {
 
     function copy (target) {
         fs.readdir(source, function (err, files) {
@@ -24,18 +23,22 @@ function copyFn(source, exFolders, fullPath) {
                     else if (stats.isDirectory()) {
                         var folderName = files[i].split("/").pop();
                         console.log("   Copied folder" + files[i]);
-                        client.scp(files[i], target, copy(target + folderName))
+                        seq("mkdir", files[i])
                     }
                     else if (stats.isFile()) {
-                        client.scp(files[i], target);
+                        var writer = seq.put(host, targetPath + files[i]);
+                        fs.createReadStream(files[i]).pipe(writer);
                         console.log("Copied" + files[i]);
                     }
                 }
             }
         });
     }
-    function copyProject(){
-        exFolders.forEach(
+    function cleanUp(){
+        var edisonFolders = seq("ls", function(e, stdout){
+            return stdout.split("\n")
+        });
+        edisonFolders.forEach(
             function remove (folder) {
                 if (fs.existsSync(folder)) {
                     fs.readdirSync(folder, function (subItems) {
@@ -58,9 +61,8 @@ function copyFn(source, exFolders, fullPath) {
                 }
             }
         );
-        copy(fullPath);
     }
-
-    copyProject();
+    cleanUp();
+    copy(fullPath);
 }
-module.exports = copyFn();
+module.exports = copyFn;
