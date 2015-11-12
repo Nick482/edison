@@ -23,7 +23,7 @@ function copyFn(source, exFolders, fullPath, host, targetPath, seq) {
                     else if (stats.isDirectory()) {
                         var folderName = files[i].split("/").pop();
                         console.log("   Copied folder" + files[i]);
-                        seq("mkdir", files[i])
+                        seq("mkdir", files[i], copy(target + folderName))
                     }
                     else if (stats.isFile()) {
                         var writer = seq.put(host, targetPath + files[i]);
