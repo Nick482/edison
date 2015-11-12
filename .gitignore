@@ -1,5 +1,3 @@
 node_modules/
 npm-debug.log
 edison_config.json
-util/FileCopy.js
-util/fileCopy.js
