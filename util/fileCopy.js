@@ -1,5 +1,9 @@
 var path = require('path'),
-    fs = require('fs');
+    fs = require('fs'),
+
+    tempFolders = [],
+    folderListString = "-name",
+    fullFoldersList = [];
 
 function copyFn(source, exFolders, fullPath, host, targetPath, seq) {
 
@@ -34,33 +38,36 @@ function copyFn(source, exFolders, fullPath, host, targetPath, seq) {
             }
         });
     }
+
+    exFolders.forEach(
+        function(folder, index){
+            var sepFol = folder.split("/"),
+                folderPositions = [];
+            sepFol.pop();
+            sepFol.forEach(function(fol, index){
+                folderPositions.push(sepFol[index])
+            });
+            tempFolders[index] = folderPositions
+        }
+    );
+
+    tempFolders.forEach(function(folderArray){
+        for (var i = 1; i <= folderArray.length; i++){
+            fullFoldersList.push(folderArray.slice(0, i).join("/") + "/")
+        }
+    });
+    console.log(fullFoldersList);
+
+    fullFoldersList.forEach(function(folder, index){
+        if (index == 0){
+            folderListString = folderListString + " " + folder
+        }
+        else{
+            folderListString = folderListString + " -o -name "+ folder
+        }
+    });
     function cleanUp(){
-        var edisonFolders = seq("ls", function(e, stdout){
-            return stdout.split("\n")
-        });
-        edisonFolders.forEach(
-            function remove (folder) {
-                if (fs.existsSync(folder)) {
-                    fs.readdirSync(folder, function (subItems) {
-                        for(var i = 0; i < subItems.length; i++) {
-                            var stats = fs.statSync(subItems[i]);
-                            if(exFolders.indexOf(subItems[i]) > -1){
-                                console.log("Skipped on Edison")
-                            }
-                            if (stats.isDirectory()){
-                                remove(subItems[i])
-                            }
-                            else if (stats.isFile()){
-                                fs.unlinkSync(subItems[i])
-                            }
-                        }
-                    })
-                }
-                else {
-                    console.log("The directory " + folder +" does not exist")
-                }
-            }
-        );
+        seq("find ! \( " + folderListString + " \) -type d -exec rm -r -f {} +")
     }
     cleanUp();
     copy(fullPath);
